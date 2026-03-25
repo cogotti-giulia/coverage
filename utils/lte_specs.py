@@ -2,12 +2,21 @@ from dataclasses import dataclass
 from enum import Enum, IntEnum
 
 
+# ===========================================
+# Supported Italian mobile Operators
+# ===========================================
 class Operator(str, Enum):
   TIM = "TIM"
   VODAFONE = "Vodafone"
   ILIAD = "Iliad"
   WINDTRE = "WindTre"
 
+
+# ============================================
+# LTE band used
+# Ref. https://lteitaly.it/it/spectrum.php
+# Ref. https://wiki.lteitaly.it/frequenze/
+# ============================================
 class LTEBand(str, Enum):
   B28 = "B28"
   B20 = "B20"
@@ -18,25 +27,42 @@ class LTEBand(str, Enum):
   B7 = "B7"
   B38 = "B38"
 
+
+# ============================================
+# Bandwidth expressed as MHz
+# Ref. https://lteitaly.it/it/spectrum.php
+# Ref. https://wiki.lteitaly.it/frequenze/
+# ============================================
 class Bandwidth(IntEnum):
   MHZ_5 = 5
   MHZ_10 = 10
   MHZ_15 = 15
   MHZ_20 = 20
 
-# Use a Dataclass to lock Bandwidth and Speed together
+
+# ============================================
+# Spec that locks bandwidth and speed together
+# Ref. https://lteitaly.it/it/spectrum.php
+# Ref. https://wiki.lteitaly.it/frequenze/
+# ============================================
 @dataclass
 class Spec:
+  """Lock bandwidth and speed together"""
   bandwidth: Bandwidth
 
   @property
   def speed(self) -> int:
-    # Automatically applies the LTE Italy Wiki rule (1 MHz = 10 Mbps)
+    """
+    Automatically applies the LTE Italy Wiki rule (1 MHz = 10 Mbps)
+    :return: The speed (in Mbps) of the bandwidth
+    """
     return self.bandwidth * 10
 
-# boh altre ma penso siano irrilevanti
 
+# ============================================
 # Identify operator by their MNC (Mobile Network Code in Italy)
+# Ref. https://en.wikipedia.org/wiki/Mobile_network_codes_in_ITU_region_2xx_(Europe)#Italy_%E2%80%93_IT
+# ============================================
 MNC_MAP = {
   "01": Operator.TIM,
   "10": Operator.VODAFONE,
@@ -45,6 +71,9 @@ MNC_MAP = {
   "99": Operator.WINDTRE
 }
 
+# =============================================
+# Maps operator with band and specs for that band
+# =============================================
 OPERATOR_SPECS = {
   Operator.VODAFONE: {
     LTEBand.B28: Spec(Bandwidth.MHZ_10),
@@ -77,7 +106,3 @@ OPERATOR_SPECS = {
     LTEBand.B7: Spec(Bandwidth.MHZ_10),
   }
 }
-
-# operator: {band_id: speed (Mbps)} speed is based on https://wiki.lteitaly.it/frequenze/ and mostly on https://lteitaly.it/it/spectrum.php
-# ref to the LTE
-# ampiezza di 10 MHz = 100 Mbps di velocità
