@@ -2,30 +2,29 @@ from dataclasses import dataclass
 from enum import Enum, IntEnum
 
 
-# ===========================================
-# Supported Italian mobile Operators
-# ===========================================
-class Operator(str, Enum):
-  TIM = "TIM"
-  VODAFONE = "Vodafone"
-  ILIAD = "Iliad"
-  WINDTRE = "WindTre"
-
-
 # ============================================
 # LTE band used
 # Ref. https://lteitaly.it/it/spectrum.php
 # Ref. https://wiki.lteitaly.it/frequenze/
 # ============================================
 class LTEBand(str, Enum):
-  B28 = "B28"
-  B20 = "B20"
-  B8 = "B8"
-  B32 = "B32"
-  B3 = "B3"
-  B1 = "B1"
-  B7 = "B7"
-  B38 = "B38"
+  # Format: (Band String, Frequency in MHz)
+  B28 = ("B28", 700)
+  B20 = ("B20", 800)
+  B8 = ("B8", 900)
+  B32 = ("B32", 1500)
+  B3 = ("B3", 1800)
+  B1 = ("B1", 2100)
+  B7 = ("B7", 2600)
+  B38 = ("B38", 2600)
+
+  def __new__(cls, value, frequency):
+    # This intercepts the tuple creation.
+    # It assigns the first item as the string value, and the second as the frequency attribute!
+    obj = str.__new__(cls, value)
+    obj._value_ = value
+    obj.frequency = frequency
+    return obj
 
 
 # ============================================
@@ -47,7 +46,8 @@ class Bandwidth(IntEnum):
 # ============================================
 @dataclass
 class Spec:
-  """Lock bandwidth and speed together"""
+  """Lock band, bandwidth and speed together"""
+  band: LTEBand
   bandwidth: Bandwidth
 
   @property
@@ -59,50 +59,64 @@ class Spec:
     return self.bandwidth * 10
 
 
-# ============================================
-# Identify operator by their MNC (Mobile Network Code in Italy)
+# ===========================================
+# Supported Italian mobile Operators
+# For each operator are defined
+# - name (e.g. Vodafone)
+# - mncs (e.g. 10)
+# - specs (A list of operator specs)
+#
+# The MNC (Mobile Network Code in Italy) identify the operator
 # Ref. https://en.wikipedia.org/wiki/Mobile_network_codes_in_ITU_region_2xx_(Europe)#Italy_%E2%80%93_IT
 # ============================================
-MNC_MAP = {
-  "01": Operator.TIM,
-  "10": Operator.VODAFONE,
-  "50": Operator.ILIAD,
-  "88": Operator.WINDTRE,
-  "99": Operator.WINDTRE
-}
+class Operator(str, Enum):
+  TIM = ("TIM", ("01",), [
+    Spec(band=LTEBand.B28, bandwidth=Bandwidth.MHZ_10),
+    Spec(band=LTEBand.B20, bandwidth=Bandwidth.MHZ_10),
+    Spec(band=LTEBand.B8, bandwidth=Bandwidth.MHZ_5),
+    Spec(band=LTEBand.B32, bandwidth=Bandwidth.MHZ_20),
+    Spec(band=LTEBand.B3, bandwidth=Bandwidth.MHZ_20),
+    Spec(band=LTEBand.B1, bandwidth=Bandwidth.MHZ_15),
+    Spec(band=LTEBand.B7, bandwidth=Bandwidth.MHZ_15),
+  ])
+  VODAFONE = ("Vodafone", ("10",), [
+    Spec(band=LTEBand.B28, bandwidth=Bandwidth.MHZ_10),
+    Spec(band=LTEBand.B20, bandwidth=Bandwidth.MHZ_10),
+    Spec(band=LTEBand.B8, bandwidth=Bandwidth.MHZ_5),
+    Spec(band=LTEBand.B32, bandwidth=Bandwidth.MHZ_20),
+    Spec(band=LTEBand.B3, bandwidth=Bandwidth.MHZ_20),
+    Spec(band=LTEBand.B1, bandwidth=Bandwidth.MHZ_15),
+    Spec(band=LTEBand.B7, bandwidth=Bandwidth.MHZ_15),
+  ])
+  ILIAD = ("Iliad", ("50",), [
+    Spec(band=LTEBand.B28, bandwidth=Bandwidth.MHZ_10),
+    Spec(band=LTEBand.B3, bandwidth=Bandwidth.MHZ_10),
+    Spec(band=LTEBand.B1, bandwidth=Bandwidth.MHZ_10),
+    Spec(band=LTEBand.B7, bandwidth=Bandwidth.MHZ_10),
+  ])
+  WINDTRE = ("WindTre", ("88", "99"), [
+    Spec(band=LTEBand.B20, bandwidth=Bandwidth.MHZ_10),
+    Spec(band=LTEBand.B3, bandwidth=Bandwidth.MHZ_20),
+    Spec(band=LTEBand.B1, bandwidth=Bandwidth.MHZ_20),
+    Spec(band=LTEBand.B7, bandwidth=Bandwidth.MHZ_20),
+  ])
 
-# =============================================
-# Maps operator with band and specs for that band
-# =============================================
-OPERATOR_SPECS = {
-  Operator.VODAFONE: {
-    LTEBand.B28: Spec(Bandwidth.MHZ_10),
-    LTEBand.B20: Spec(Bandwidth.MHZ_10),
-    LTEBand.B8: Spec(Bandwidth.MHZ_5),
-    LTEBand.B32: Spec(Bandwidth.MHZ_20),
-    LTEBand.B3: Spec(Bandwidth.MHZ_20),
-    LTEBand.B1: Spec(Bandwidth.MHZ_15),
-    LTEBand.B7: Spec(Bandwidth.MHZ_15),
-  },
-  Operator.WINDTRE: {
-    LTEBand.B20: Spec(Bandwidth.MHZ_10),
-    LTEBand.B3: Spec(Bandwidth.MHZ_20),
-    LTEBand.B1: Spec(Bandwidth.MHZ_20),
-    LTEBand.B7: Spec(Bandwidth.MHZ_20),
-  },
-  Operator.TIM: {
-    LTEBand.B28: Spec(Bandwidth.MHZ_10),
-    LTEBand.B20: Spec(Bandwidth.MHZ_10),
-    LTEBand.B8: Spec(Bandwidth.MHZ_5),
-    LTEBand.B32: Spec(Bandwidth.MHZ_20),
-    LTEBand.B3: Spec(Bandwidth.MHZ_20),
-    LTEBand.B1: Spec(Bandwidth.MHZ_15),
-    LTEBand.B7: Spec(Bandwidth.MHZ_15),
-  },
-  Operator.ILIAD: {
-    LTEBand.B28: Spec(Bandwidth.MHZ_10),
-    LTEBand.B3: Spec(Bandwidth.MHZ_10),
-    LTEBand.B1: Spec(Bandwidth.MHZ_10),
-    LTEBand.B7: Spec(Bandwidth.MHZ_10),
-  }
-}
+  def __new__(cls, value, mncs, specs_list):
+    """
+    called before the __init__ method
+    :param value:
+    :param specs_list:
+    """
+    obj = str.__new__(cls, value)
+    obj._value_ = value
+    obj.mncs = mncs
+    # Automatically converts the list into a lightning-fast dictionary
+    obj.specs = {spec.band: spec for spec in specs_list}
+    return obj
+
+  @classmethod
+  def from_mnsc(cls, mnc_code: str):
+    for operator in cls:
+      if mnc_code in operator.mncs:
+        return operator
+    return None  # no operator found
