@@ -1,2 +1,31 @@
 .idea/*
-settings.py
+.venv/*
+.env
+.env.dev
+docs/*
+# Ignora tutto il contenuto delle cartelle degli operatori
+data/Vodafone/inbox/*
+data/Vodafone/archive/*
+data/Vodafone/logs/*
+data/WindTre/inbox/*
+data/WindTre/archive/*
+data/WindTre/logs/*
+data/Iliad/inbox/*
+data/Iliad/archive/*
+data/Iliad/logs/*
+data/TIM/inbox/*
+data/TIM/archive/*
+data/TIM/logs/*
+# Ma NON ignorare i file .gitkeep (la '!' serve a negare l'ignore)
+!data/Vodafone/inbox/.gitkeep
+!data/Vodafone/archive/.gitkeep
+!data/Vodafone/logs/.gitkeep
+!data/WindTre/inbox/.gitkeep
+!data/WindTre/archive/.gitkeep
+!data/WindTre/logs/.gitkeep
+!data/Iliad/inbox/.gitkeep
+!data/Iliad/archive/.gitkeep
+!data/Iliad/logs/.gitkeep
+!data/TIM/inbox/.gitkeep
+!data/TIM/archive/.gitkeep
+!data/TIM/logs/.gitkeep

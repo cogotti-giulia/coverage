@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass
 from enum import Enum, IntEnum
 
@@ -102,11 +103,6 @@ class Operator(str, Enum):
   ])
 
   def __new__(cls, value, mncs, specs_list):
-    """
-    called before the __init__ method
-    :param value:
-    :param specs_list:
-    """
     obj = str.__new__(cls, value)
     obj._value_ = value
     obj.mncs = mncs
@@ -114,8 +110,28 @@ class Operator(str, Enum):
     obj.specs = {spec.band: spec for spec in specs_list}
     return obj
 
+  @property
+  def base_table(self) -> str:
+    """DB table name"""
+    return f"{os.getenv('DB_NAME')}_{self.value.lower()}coveragerow"
+
+  @property
+  def tmp_table(self) -> str:
+    """DB tmp table name"""
+    return f"{self.base_table}_tmp"
+
+  @property
+  def old_table(self) -> str:
+    """DB old table name"""
+    return f"{self.base_table}_old"
+
   @classmethod
   def from_mnsc(cls, mnc_code: str):
+    """
+    Returns the operator name corresponding to the given mnc code
+    :param mnc_code: a mnc code
+    :return: the operator name
+    """
     for operator in cls:
       if mnc_code in operator.mncs:
         return operator

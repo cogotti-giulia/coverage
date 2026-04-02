@@ -31,10 +31,10 @@ class Logger:
   def warning(message, warning_detail=None):
     Logger.log(message, "WARNING")
     if warning_detail:
-      print("{}Details: {}{}".format(Fore.YELLOW, Fore.RESET, warning_detail))
+      print(f"{Fore.YELLOW}Details: {Fore.RESET}{warning_detail}")
 
   @staticmethod
   def error(message, error_detail=None):
     Logger.log(message, "ERROR")
     if error_detail:
-      print("{}Details: {}".format(Fore.RED, error_detail))
+      print(f"{Fore.RED}Details: {error_detail}")
