@@ -1,6 +1,7 @@
 import os
 from dataclasses import dataclass
 from enum import Enum, IntEnum
+from pathlib import Path
 
 
 # ============================================
@@ -59,13 +60,29 @@ class Spec:
     """
     return self.bandwidth * 10
 
+# ===========================================
+# Default database columns for standard operators
+# ===========================================
+DEFAULT_DB_COLUMNS = [
+    'latitude',
+    'longitude',
+    'arfcn',
+    'site_name',
+    'band_id',
+    'loss',  # should  be called "sector"
+    'technology',
+    'speed',
+    'bandwidth',  # it's the frequency
+]
 
 # ===========================================
 # Supported Italian mobile Operators
 # For each operator are defined
-# - name (e.g. Vodafone)
+# - name (e.g. VODAFONE)
+# - value (e.g. Vodafone)
 # - mncs (e.g. 10)
 # - specs (A list of operator specs)
+# - db_columns (A list of DB columns for the operator)
 #
 # The MNC (Mobile Network Code in Italy) identify the operator
 # Ref. https://en.wikipedia.org/wiki/Mobile_network_codes_in_ITU_region_2xx_(Europe)#Italy_%E2%80%93_IT
@@ -79,7 +96,7 @@ class Operator(str, Enum):
     Spec(band=LTEBand.B3, bandwidth=Bandwidth.MHZ_20),
     Spec(band=LTEBand.B1, bandwidth=Bandwidth.MHZ_15),
     Spec(band=LTEBand.B7, bandwidth=Bandwidth.MHZ_15),
-  ])
+  ], DEFAULT_DB_COLUMNS)
   VODAFONE = ("Vodafone", ("10",), [
     Spec(band=LTEBand.B28, bandwidth=Bandwidth.MHZ_10),
     Spec(band=LTEBand.B20, bandwidth=Bandwidth.MHZ_10),
@@ -88,26 +105,27 @@ class Operator(str, Enum):
     Spec(band=LTEBand.B3, bandwidth=Bandwidth.MHZ_20),
     Spec(band=LTEBand.B1, bandwidth=Bandwidth.MHZ_15),
     Spec(band=LTEBand.B7, bandwidth=Bandwidth.MHZ_15),
-  ])
+  ], DEFAULT_DB_COLUMNS)
   ILIAD = ("Iliad", ("50",), [
     Spec(band=LTEBand.B28, bandwidth=Bandwidth.MHZ_10),
     Spec(band=LTEBand.B3, bandwidth=Bandwidth.MHZ_10),
     Spec(band=LTEBand.B1, bandwidth=Bandwidth.MHZ_10),
     Spec(band=LTEBand.B7, bandwidth=Bandwidth.MHZ_10),
-  ])
+  ], DEFAULT_DB_COLUMNS)
   WINDTRE = ("WindTre", ("88", "99"), [
     Spec(band=LTEBand.B20, bandwidth=Bandwidth.MHZ_10),
     Spec(band=LTEBand.B3, bandwidth=Bandwidth.MHZ_20),
     Spec(band=LTEBand.B1, bandwidth=Bandwidth.MHZ_20),
     Spec(band=LTEBand.B7, bandwidth=Bandwidth.MHZ_20),
-  ])
+  ], DEFAULT_DB_COLUMNS)
 
-  def __new__(cls, value, mncs, specs_list):
+  def __new__(cls, value, mncs, specs_list, db_columns):
     obj = str.__new__(cls, value)
     obj._value_ = value
     obj.mncs = mncs
     # Automatically converts the list into a lightning-fast dictionary
     obj.specs = {spec.band: spec for spec in specs_list}
+    obj.db_columns = db_columns
     return obj
 
   @property
@@ -124,6 +142,23 @@ class Operator(str, Enum):
   def old_table(self) -> str:
     """DB old table name"""
     return f"{self.base_table}_old"
+
+  @property
+  def base_path(self) -> str:
+    base_dir = Path(__file__).resolve().parent.parent
+    return os.path.join(base_dir, "data", str(self.value))
+
+  @property
+  def inbox_path(self) -> str:
+    return os.path.join(self.base_path, "inbox")
+
+  @property
+  def archive_path(self) -> str:
+    return os.path.join(self.base_path, "archive")
+
+  @property
+  def log_path(self) -> str:
+    return os.path.join(self.base_path, "log")
 
   @classmethod
   def from_mnsc(cls, mnc_code: str):

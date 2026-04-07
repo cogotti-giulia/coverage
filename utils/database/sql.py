@@ -32,9 +32,15 @@ class SqlHelper:
           func(cursor)
         return cursor.fetchall()
     except Exception as e:
-      self._conn.rollback()
+      # SAFE ROLLBACK: Only try to rollback if the connection is still alive
+      if self._conn and self._conn.is_connected():
+        try:
+          self._conn.rollback()
+        except Exception as rollback_err:
+          self._logger.error(f"Failed to rollback: {rollback_err}")
+
       self._logger.error("Error executing query. Rolled back changes.", error_detail=e)
-      raise
+      raise  # Rethrow the original error so the orchestrator knows it failed
 
   def copy_table(self, old_table_name, new_table_name):
     """
@@ -55,6 +61,22 @@ class SqlHelper:
     :param new_table_name: The new name for the table.
     """
     sql = f"ALTER TABLE {old_table_name} RENAME TO {new_table_name};"
+    self.execute(sql)
+
+  def swap_tables_atomically(self, current_table, backup_table, new_table):
+    """
+    Atomically swaps the tables.
+    It renames the current table to the backup name, and the new table to the current name in one single, unbreakable step.
+
+    :param current_table: The live table (e.g., check_coverage_tim)
+    :param backup_table: Where the live data should go (e.g., check_coverage_tim_old)
+    :param new_table: The temporary table with new data (e.g., check_coverage_tim_tmp)
+    """
+    sql = f"""
+        RENAME TABLE 
+        {current_table} TO {backup_table},
+        {new_table} TO {current_table};
+    """
     self.execute(sql)
 
   def create_table(self, table_name, columns):

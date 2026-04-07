@@ -1,8 +1,6 @@
 import os
 
 import mysql.connector
-from dotenv import load_dotenv
-from mysql.connector import Error
 from contextlib import contextmanager
 
 from utils.style import Logger
@@ -32,7 +30,7 @@ def get_db_connection():
     # give control back to the main script
     yield conn
 
-  except Error as e:
+  except mysql.connector.Error as e:
     logger.error("Database error", error_detail=e)
     raise
 
