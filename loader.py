@@ -135,7 +135,7 @@ class CoverageDbSynchronizer(object):
 
       self._logger.info(f"Successfully updated coverage data for {operator.name}")
 
-      # TODO forse devo aggiornare la tabella dove ci sono gli operator (???)
+      # TODO forse devo aggiornare la tabella dove ci sono gli operator
     except Exception as e:
       self._logger.error(f"Sync failed for {operator.name}. Cleaning up temporary data...")
 
