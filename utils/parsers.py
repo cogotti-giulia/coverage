@@ -3,7 +3,7 @@ import os
 
 import pandas as pd
 
-from utils.lte_specs import Operator
+from utils.lte_specs import MobileOperator
 from utils.style import Logger
 
 
@@ -28,7 +28,7 @@ class NetmonsterParser(object):
   def _lookup_band_specs(self, row: pd.Series) -> tuple[str | None, str | None]:
     """Helper function to fetch speed and frequency based on mnc and band_id"""
     try:
-      operator = Operator.from_mnsc(row['mnc'])
+      operator = MobileOperator.from_mnsc(row['mnc'])
       spec = operator.specs[row["band_id"]]
       return (spec.speed, str(spec.band.frequency))
     except (KeyError, ValueError, AttributeError):
@@ -64,7 +64,7 @@ class NetmonsterParser(object):
     df = df.rename(columns={'earfcn': 'arfcn'})
 
     first_mnc = df['mnc'].iloc[0]
-    operator = Operator.from_mnsc(first_mnc)
+    operator = MobileOperator.from_mnsc(first_mnc)
     # Filter the DataFrame to ONLY include the columns for the database
     df_db_ready = df[operator.db_columns].copy()
 

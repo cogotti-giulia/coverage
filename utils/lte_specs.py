@@ -97,7 +97,7 @@ DEFAULT_DB_COLUMNS = [
 # The MNC (Mobile Network Code in Italy) identify the operator
 # Ref. https://en.wikipedia.org/wiki/Mobile_network_codes_in_ITU_region_2xx_(Europe)#Italy_%E2%80%93_IT
 # ============================================
-class Operator(str, Enum):
+class MobileOperator(str, Enum):
   TIM = ("TIM", ("01",), [
     Spec(band=LTEBand.B28, bandwidth=Bandwidth.MHZ_10),
     Spec(band=LTEBand.B20, bandwidth=Bandwidth.MHZ_10),

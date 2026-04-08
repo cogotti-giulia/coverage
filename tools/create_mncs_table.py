@@ -8,7 +8,7 @@ import mysql.connector
 
 from utils.database.db_connect import get_db_connection
 from utils.database.sql import SqlHelper
-from utils.lte_specs import Operator, DEFAULT_MNCS_TABLE_NAME, DEFAULT_UPDATE_TABLE_NAME
+from utils.lte_specs import MobileOperator, DEFAULT_MNCS_TABLE_NAME, DEFAULT_UPDATE_TABLE_NAME
 from utils.style import Logger
 
 
@@ -27,9 +27,9 @@ def main(args):
       operator_list = []
       if args.operator:
         for op_name in args.operator:
-          operator_list.append(Operator.from_identifier(op_name))
+          operator_list.append(MobileOperator.from_identifier(op_name))
       else:
-        operator_list = Operator
+        operator_list = MobileOperator
 
       for op in operator_list:
         # 1. prendi l'id  dalla check_coverage_coverageupdate

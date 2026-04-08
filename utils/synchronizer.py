@@ -5,7 +5,7 @@ import pandas as pd
 
 from utils.database.sql import SqlHelper
 from utils.exporter import BaseDataFrameExporter
-from utils.lte_specs import Operator, DEFAULT_UPDATE_TABLE_NAME, DEFAULT_MNCS_TABLE_NAME
+from utils.lte_specs import MobileOperator, DEFAULT_UPDATE_TABLE_NAME, DEFAULT_MNCS_TABLE_NAME
 from utils.style import Logger
 
 
@@ -17,7 +17,7 @@ class CoverageDbSynchronizer(object):
     self._DEBUG = debug_mode
     self._logger = Logger()
 
-  def replace_operator_coverage(self, operator: Operator, df: pd.DataFrame):
+  def replace_operator_coverage(self, operator: MobileOperator, df: pd.DataFrame):
     """
     Safely replaces the old coverage table with the newly parsed data.
     How does it work? (happy case, when everything works as expected)

@@ -4,7 +4,7 @@ import os.path
 import shutil
 import mysql.connector
 
-from utils.lte_specs import Operator
+from utils.lte_specs import MobileOperator
 from utils.parsers import NetmonsterParser
 from utils.style import Logger
 from utils.synchronizer import CoverageDbSynchronizer
@@ -32,7 +32,7 @@ class CoveragePipelineOrchestrator:
     else:
       raise ValueError(f"Unsupported file format: {ext}")
 
-  def _process_operator_files(self, operator: Operator, extension: str = None):
+  def _process_operator_files(self, operator: MobileOperator, extension: str = None):
     """
     Finds files in the operator's inbox.
     If extension is provided (e.g., 'ntm'), only those files are processed.
@@ -90,17 +90,17 @@ class CoveragePipelineOrchestrator:
     if self._DEBUG:
       self._logger.info("Starting global coverage sync pipeline...")
 
-    for operator in Operator:  # Ensure directories exist before we do anything
+    for operator in MobileOperator:  # Ensure directories exist before we do anything
       self.sync_operator(operator, extension)
     if self._DEBUG:
       self._logger.info("Global coverage sync pipeline finished.")
 
-  def sync_operator(self, operator_identifier: Operator | str, extension: str = None):
+  def sync_operator(self, operator_identifier: MobileOperator | str, extension: str = None):
     """
     Runs the pipeline for a single specific operator.
     Accepts either an Operator enum instance or a string name (e.g., 'TIM' or 'Vodafone').
     """
-    target_op = Operator.from_identifier(operator_identifier)
+    target_op = MobileOperator.from_identifier(operator_identifier)
 
     # Ensure directories exist to prevent OS Errors (they should)
     os.makedirs(target_op.inbox_path, exist_ok=True)
