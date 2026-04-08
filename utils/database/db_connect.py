@@ -38,7 +38,7 @@ def get_db_connection():
     # this runs no matter what happens (even on errors)
     if conn and conn.is_connected():
       conn.close()
-      logger.log("Database connection closed")
+      # logger.log("Database connection closed")
 
 from contextlib import contextmanager
 

@@ -5,9 +5,25 @@ from utils.style import Logger
 class SqlHelper:
   """Just a SQL helper class to perform simple operations"""
 
-  def __init__(self, conn):
+  def __init__(self, conn, engine="MyISAM", debug_mode=False):
     self._conn = conn
+    self._engine = engine
+    self._DEBUG = debug_mode
     self._logger = Logger()
+
+  @classmethod
+  def build_in_placeholders(cls, target_list):
+    return ", ".join(["%s"] * len(target_list))
+
+  @classmethod
+  def extract_column(cls, data, col_index=0):
+    """Extracts a single column from fetched database rows."""
+    return [row[col_index] for row in data]
+
+  @classmethod
+  def flatten_all_data(cls, data):
+    """Flattens all columns and rows into a single 1D list."""
+    return [item for row in data for item in row]
 
   def execute(self, query, params=None, commit=False, func=None):
     """
@@ -25,9 +41,11 @@ class SqlHelper:
       with get_connection_cursor(self._conn, commit) as cursor:
         if isinstance(params, list):
           params = tuple(params)
-        self._logger.log(f"Executing\n{query}")
+        if self._DEBUG:
+          self._logger.log(f"Executing\n{query}")
         cursor.execute(query, params)
-        self._logger.log(".....yey")
+        if self._DEBUG:
+          self._logger.log(".....yey")
         if func:
           func(cursor)
         return cursor.fetchall()
@@ -100,7 +118,7 @@ class SqlHelper:
     sql = f"""
      CREATE TABLE IF NOT EXISTS `{table_name}` (
       {columns_sql}
-    ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+    ) ENGINE={self._engine} DEFAULT CHARSET=latin1;
     """
 
     self.execute(sql)
@@ -161,5 +179,6 @@ class SqlHelper:
       ({columns_string});
     """
 
-    self._logger.info(f"Loading data from {filename} into {table_name}...")
+    if self._DEBUG:
+      self._logger.info(f"Loading data from {filename} into {table_name}...")
     self.execute(sql, params=[absolute_path], commit=True)

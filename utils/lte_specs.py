@@ -3,6 +3,8 @@ from dataclasses import dataclass
 from enum import Enum, IntEnum
 from pathlib import Path
 
+from utils.style import Logger
+
 
 # ============================================
 # LTE band used
@@ -60,20 +62,28 @@ class Spec:
     """
     return self.bandwidth * 10
 
+
+# ===========================================
+# Default database table names
+# ===========================================
+DEFAULT_UPDATE_TABLE_NAME = "check_coverage_coverageupdate"
+DEFAULT_MNCS_TABLE_NAME = "check_coverage_coveragemncs"
+
 # ===========================================
 # Default database columns for standard operators
 # ===========================================
 DEFAULT_DB_COLUMNS = [
-    'latitude',
-    'longitude',
-    'arfcn',
-    'site_name',
-    'band_id',
-    'loss',  # should  be called "sector"
-    'technology',
-    'speed',
-    'bandwidth',  # it's the frequency
+  'latitude',
+  'longitude',
+  'arfcn',
+  'site_name',
+  'band_id',
+  'loss',  # should  be called "sector"
+  'technology',
+  'speed',
+  'bandwidth',  # it's the frequency
 ]
+
 
 # ===========================================
 # Supported Italian mobile Operators
@@ -171,3 +181,27 @@ class Operator(str, Enum):
       if mnc_code in operator.mncs:
         return operator
     return None  # no operator found
+
+  @classmethod
+  def from_identifier(cls, identifier):
+    """
+    Safely resolves a string or Operator instance into a valid Operator enum.
+    :param identifier: an Operator instance or a string representing the operator name or value (e.g., 'Vodafone', 'VODAFONE', 'VoDaFOne').
+    :return: Operator instance
+    """
+    # If it's already an Operator, just return it
+    if isinstance(identifier, cls):
+      return identifier
+
+    # If it's a string, perform the lookup by the Enum name (e.g., 'VODAFONE') or value (e.g., 'Vodafone')
+    if isinstance(identifier, str):
+      identifier_upper = identifier.upper()
+      for op in cls:
+        if op.name.upper() == identifier_upper or op.value.upper() == identifier_upper:
+          return op
+
+    # Handle the case where it's not found
+    logger = Logger()
+    logger.error(f"Could not find operator matching: {identifier}")
+
+    raise ValueError(f"'{identifier}' is not a valid Operator")
