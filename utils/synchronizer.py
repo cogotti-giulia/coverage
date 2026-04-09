@@ -27,7 +27,7 @@ class CoverageDbSynchronizer(object):
     4. load csv in the `check_coverage_<operator>_tmp` table
     5. atomic swap:
        - rename `check_coverage_<operator>` to `_old` (keep backup)
-       -rename `check_coverage_<operator>_tmp` into `check_coverage_<operator>`
+       - rename `check_coverage_<operator>_tmp` into `check_coverage_<operator>`
     6. Update `check_coverage_coverageupdate` table to track data update
     7. delete the temporary csv file
     :param operator: the operator to use
@@ -73,6 +73,7 @@ class CoverageDbSynchronizer(object):
       res = self._sql_helper.execute(select_supplier_id_sql, params=operator.mncs)
       if not res:
         self._logger.warning(f"Operator with MNCs {operator.mncs} not found. Needs insertion. TO BE IMPLEMENTED.")
+        # TODO implement this, ensure also that table exists (??)
       else:
         # 6.2 Update the info data by supplier id
         res_list = SqlHelper.extract_column(res, 0)

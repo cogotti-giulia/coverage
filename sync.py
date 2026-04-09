@@ -6,7 +6,7 @@ import argparse
 import mysql.connector
 
 from utils.database.db_connect import get_db_connection
-from utils.loader import CoveragePipelineOrchestrator
+from utils.orchestrator import CoveragePipelineOrchestrator
 from utils.style import Logger
 
 
