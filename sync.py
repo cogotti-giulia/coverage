@@ -6,14 +6,14 @@ import argparse
 import mysql.connector
 
 from utils.database.db_connect import get_db_connection
-from utils.orchestrator import CoveragePipelineOrchestrator
+from utils.orchestrator import CoverageOrchestrator
 from utils.style import Logger
 
 
 def main(args):
   try:
     with get_db_connection() as conn:
-      orchestrator = CoveragePipelineOrchestrator(conn, debug_mode=args.debug)
+      orchestrator = CoverageOrchestrator(conn, debug_mode=args.debug)
       if args.operator:
         for op_name in args.operator:
           orchestrator.sync_operator(op_name, extension=args.format)

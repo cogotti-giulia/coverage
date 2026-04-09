@@ -31,19 +31,27 @@ def main(args):
       else:
         operator_list = MobileOperator
 
+      rows_to_insert = []
       for op in operator_list:
         # 1. prendi l'id  dalla check_coverage_coverageupdate
-        ids_sql = f"""
-               SELECT id FROM {DEFAULT_UPDATE_TABLE_NAME} WHERE supplier LIKE CONCAT('%', %s, '%')"""
+        ids_sql = f"""SELECT id FROM {DEFAULT_UPDATE_TABLE_NAME} WHERE supplier LIKE CONCAT('%', %s, '%')"""
 
         res = sql_helper.execute(ids_sql, (op.value,))
         res_list = SqlHelper.extract_column(res, 0)
+
         for id_op in res_list:
-          sql = """INSERT IGNORE INTO check_coverage_coveragemncs (mnc, supplier_id) VALUES(%s, %s);"""
-
           for mnc in op.mncs:
-            sql_helper.execute(sql, params=(mnc, id_op))
+            rows_to_insert.append({
+              "mnc": mnc,
+              "supplier_id": id_op
+            })
 
+    if rows_to_insert:
+      sql_helper.bulk_insert(
+        table=DEFAULT_MNCS_TABLE_NAME,
+        data_list=rows_to_insert,
+        ignore=True
+      )
 
 
   except mysql.connector.Error as db_err:

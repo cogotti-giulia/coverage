@@ -72,8 +72,8 @@ class CoverageDbSynchronizer(object):
       select_supplier_id_sql = f"""SELECT DISTINCT supplier_id FROM {DEFAULT_MNCS_TABLE_NAME} WHERE mnc IN ({placeholders});"""
       res = self._sql_helper.execute(select_supplier_id_sql, params=operator.mncs)
       if not res:
-        self._logger.warning(f"Operator with MNCs {operator.mncs} not found. Needs insertion. TO BE IMPLEMENTED.")
-        # TODO implement this, ensure also that table exists (??)
+        # FIXME (MAYBE) i'll just assume it exists, otherwise i'll warn the usr about creation
+        self._logger.warning(f"Operator with MNCs {operator.mncs} not found. Needs insertion. Please, run tool/create_mncs command first!")
       else:
         # 6.2 Update the info data by supplier id
         res_list = SqlHelper.extract_column(res, 0)

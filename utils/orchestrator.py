@@ -10,7 +10,7 @@ from utils.style import Logger
 from utils.synchronizer import CoverageDbSynchronizer
 
 
-class CoveragePipelineOrchestrator:
+class CoverageOrchestrator:
   """Orchestrates the discovery, parsing, and syncing of coverage data."""
 
   def __init__(self, db_conn, debug_mode=False):
@@ -65,6 +65,7 @@ class CoveragePipelineOrchestrator:
         synchronizer = CoverageDbSynchronizer(self.db_conn, debug_mode=self._DEBUG)
         synchronizer.replace_operator_coverage(operator, df)
 
+        # todo DO not archive if missing mncs on db table (????)
         # Archive the file if successful
         archive_filename = f"{timestamp}_{filename}"
         archive_dest = os.path.join(operator.archive_path, archive_filename)

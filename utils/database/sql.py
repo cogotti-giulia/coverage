@@ -38,17 +38,25 @@ class SqlHelper:
     :raises Exception: If the query fails, rolls back the transaction and re-raises the error.
     """
     try:
+      if self._conn:
+        try:
+          # ping(True) attempts to reconnect if the connection is lost
+          self._conn.ping(reconnect=True, attempts=3, delay=2)
+        except Exception as ping_err:
+          self._logger.error(f"Reconnection failed: {ping_err}")
+          raise
       with get_connection_cursor(self._conn, commit) as cursor:
-        if isinstance(params, list):
-          params = tuple(params)
-        if self._DEBUG:
-          self._logger.log(f"Executing\n{query}")
-        cursor.execute(query, params)
-        if self._DEBUG:
-          self._logger.log(".....yey")
+        if query:
+          if isinstance(params, list):
+            params = tuple(params)
+          if self._DEBUG:
+            self._logger.log(f"Executing\n{query}")
+          cursor.execute(query, params)
+          if self._DEBUG:
+            self._logger.log(".....yey")
         if func:
           func(cursor)
-        return cursor.fetchall()
+        return cursor.fetchall() if cursor.description else []
     except Exception as e:
       # SAFE ROLLBACK: Only try to rollback if the connection is still alive
       if self._conn and self._conn.is_connected():
@@ -99,7 +107,7 @@ class SqlHelper:
 
   def create_table(self, table_name, columns):
     """
-    Creates the table with the given name and columns.
+    Creates the table (if not already exists) with the given name and columns.
     Raises an exception if something goes wrong in the db operation and rollback.
 
     :param table_name: Name of the table
@@ -136,6 +144,64 @@ class SqlHelper:
       DROP TABLE IF EXISTS {table_name};
       """
       self.execute(sql)
+
+  def insert(self, table, data, commit=True, ignore=False):
+    """
+    Inserts a single row of data into the specified table.
+    Dynamically builds the SQL query based on the dictionary keys provided.
+
+    :param table: Name of the destination table
+    :param data: A dictionary representing the row where keys are column names
+                 and values are the data to insert.
+    :param commit: Boolean indicating whether to commit the transaction (default True).
+    :param ignore: If True, uses 'INSERT IGNORE' to skip rows that would cause
+                   duplicate key or constraint errors.
+    """
+    ignore_str = "IGNORE" if ignore else ""
+    columns = data.keys()
+    placeholders = [f"%s" for _ in columns]
+
+    # Format: INSERT INTO table (`col1`, `col2`) VALUES (%s, %s)
+    sql = f"""
+        INSERT {ignore_str} INTO `{table}` ({", ".join([f"`{c}`" for c in columns])})
+        VALUES ({", ".join(placeholders)});
+    """
+
+    return self.execute(sql, params=list(data.values()), commit=commit)
+
+  def bulk_insert(self, table, data_list, commit=True, ignore=False):
+    """
+    Inserts multiple rows into the specified table efficiently using executemany.
+    Assumes that all dictionaries in the list share the same keys as the first entry.
+
+    :param table: Name of the destination table.
+    :param data_list: A list of dictionaries, where each dictionary represents a row
+                      mapping {column_name: value}.
+    :param commit: Boolean indicating whether to commit the transaction (default True).
+    :param ignore: If True, uses 'INSERT IGNORE' to skip rows that would cause
+                   duplicate key or constraint errors.
+    """
+    if not data_list:
+      return
+
+    ignore_str = "IGNORE" if ignore else ""
+    columns = data_list[0].keys()
+    placeholders = [f"%s" for _ in columns]
+
+    sql = f"""
+        INSERT {ignore_str} INTO `{table}` ({", ".join([f"`{c}`" for c in columns])})
+        VALUES ({", ".join(placeholders)});
+    """
+
+    values = [tuple(d.values()) for d in data_list]
+
+    def do_bulk(cursor):
+      if self._DEBUG:
+        self._logger.log(f"Bulk inserting {len(values)} rows into {table}")
+      cursor.executemany(sql, values)
+
+    return self.execute(query=None, params=None, commit=commit, func=do_bulk)
+
 
   def create_index(self, idx, table, column):
     """

@@ -32,7 +32,7 @@ Nel file `utils/lte_specs.py` si trovano tutti i dati e le logiche necessarie a 
 
 ## Come funziona?
 
-### 1. Orchestrazione (CoveragePipelineOrchestrator)
+### 1. Orchestrazione (CoverageOrchestrator)
 Si occupa di coordinare l'intero flusso di lavoro per ogni singolo operatore telefonico:
 
 1. Cerca i file contenenti i nuovi dati di copertura nella cartella `data/<operatore>/inbox`. È possibile filtrare la ricerca per un'estensione specifica (es. .ntm).
