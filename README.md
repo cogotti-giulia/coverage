@@ -82,6 +82,8 @@ python sync.py --operator vodafone windtre --format ntm
 python sync.py --format ntm --debug
 ```
 
+> **ATTENZIONE**: la prima volta runnare il tool `create_mncs_table` prima di eseguire questo script!
+
 ### Eventuali tools
 All'interno della cartella `tools` sono presenti tutti gli script che possono tornare utili.
 
@@ -98,3 +100,8 @@ Se una riga esiste già la ignora senza lanciare alcun errore.
 | `--operator` | Nome di uno o più operatori, se non specificato crea una riga per ogni operatore presente in OperatorMobile | str                        | nope         |
 
 Se ti stessi chiedendo a che serve per inserire correttamente la data di ultimo aggiornamento dei dati degli operatori, facilitando la selezione dell'operatore tramite il codice univoco.
+
+Esempio:
+```
+python -m tools.create_mncs_table --operator vodafone windtre
+```
