@@ -68,7 +68,7 @@ Lo script principale `sync.py` si trova nella cartella principale del progetto.
 
 | PARAMETRI    | HELP                                                                                                                                                                                                    | VALORI                     | OBBLIGATORIO |
 |--------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------|--------------|
-| `--operator` | Nome di o più operatori, se non specificato sincronizza tutti quelli presenti in OperatorMobile                                                                                                         | str                        | nope         |
+| `--operator` | Nome di uno o più operatori, se non specificato sincronizza tutti quelli presenti in OperatorMobile                                                                                                     | str                        | nope         |
 | `--format`   | Formato dei file con i dati di copertura da prelevare nella cartella `data/<operator>/inbox`. Se non specificato preleva tutti i file presenti (anche se attualmente è supportato solo il formato ntm). | str                        | nope         |     
 | `--debug`    | Mostra tante righe carine e utili di debug                                                                                                                                                              | boolean, False di default  | nope         |  
 | `--dry-run`  | Esegue una simulazione, senza modificare i dati nel database e senza spostare i file                                                                                                                    | boolean, False di default  | nope         |
@@ -85,3 +85,16 @@ python sync.py --format ntm --debug
 ### Eventuali tools
 All'interno della cartella `tools` sono presenti tutti gli script che possono tornare utili.
 
+#### Creare tabella mncs e popolarla
+
+Lo script `create_mncs_table` si occupa di creare o aggiornare la tabella `check_coverage_coveragemncs`, inserendo, per ogni operatore:
+- **mnc**: codice univoco dell'operatore.
+- **supplier_id**: ID relativo all'operatore presente nella tabella `check_coverage_coverageupdate`. _(MyISAM non supporta le foreign key!)_
+
+Se una riga esiste già la ignora senza lanciare alcun errore.
+
+| PARAMETRI    | HELP                                                                                                        | VALORI                     | OBBLIGATORIO |
+|--------------|-------------------------------------------------------------------------------------------------------------|----------------------------|--------------|
+| `--operator` | Nome di uno o più operatori, se non specificato crea una riga per ogni operatore presente in OperatorMobile | str                        | nope         |
+
+Se ti stessi chiedendo a che serve per inserire correttamente la data di ultimo aggiornamento dei dati degli operatori, facilitando la selezione dell'operatore tramite il codice univoco.

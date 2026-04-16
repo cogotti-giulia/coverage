@@ -63,7 +63,7 @@ def main(args):
 
 
 if __name__ == '__main__':
-  parser = argparse.ArgumentParser(description="LTE Coverage Data Sync Pipeline")
+  parser = argparse.ArgumentParser(description="Creates or updates the MNCS table, adding a row for each operator. When inserting skip rows that would cause duplicate key or constraint errors.")
   parser.add_argument("--operator", type=str, nargs='+',
                       help="One or more operators (e.g., --operator Vodafone WindTre). Omitting syncs all.")
 
