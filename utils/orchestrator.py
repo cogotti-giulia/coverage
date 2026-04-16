@@ -13,9 +13,10 @@ from utils.synchronizer import CoverageDbSynchronizer
 class CoverageOrchestrator:
   """Orchestrates the discovery, parsing, and syncing of coverage data."""
 
-  def __init__(self, db_conn, debug_mode=False):
+  def __init__(self, db_conn, debug_mode=False, dry_run_mode=False):
     self.db_conn = db_conn
     self._DEBUG = debug_mode
+    self._DRY_RUN = dry_run_mode
     self._logger = Logger()
 
   def _get_parser_for_file(self, filepath: str):
@@ -62,13 +63,19 @@ class CoverageOrchestrator:
             f"The file {filename} parsed successfully but contains 0 rows of data. Aborting sync to protect live tables.")
 
         # Sync to the database
-        synchronizer = CoverageDbSynchronizer(self.db_conn, debug_mode=self._DEBUG)
+        synchronizer = CoverageDbSynchronizer(self.db_conn, debug_mode=self._DEBUG, dry_run_mode=self._DRY_RUN)
         synchronizer.replace_operator_coverage(operator, df)
 
         # todo DO not archive if missing mncs on db table (????)
         # Archive the file if successful
+
         archive_filename = f"{timestamp}_{filename}"
         archive_dest = os.path.join(operator.archive_path, archive_filename)
+
+        if self._DRY_RUN:
+          self._logger.info(f"[DRY RUN] {filename} is now synced. Archiving coverage file into {archive_dest}")
+          return
+
         shutil.move(filepath, archive_dest)
         if self._DEBUG:
           self._logger.info(f"Successfully processed and archived {filename}.")

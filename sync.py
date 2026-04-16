@@ -13,7 +13,7 @@ from utils.style import Logger
 def main(args):
   try:
     with get_db_connection() as conn:
-      orchestrator = CoverageOrchestrator(conn, debug_mode=args.debug)
+      orchestrator = CoverageOrchestrator(conn, debug_mode=args.debug, dry_run_mode=args.dry_run)
       if args.operator:
         for op_name in args.operator:
           orchestrator.sync_operator(op_name, extension=args.format)
@@ -28,7 +28,6 @@ def main(args):
     sys.exit(1)
 
 if __name__ == '__main__':
-  # TODO add dry-run mode
   parser = argparse.ArgumentParser(description="LTE Coverage Data Sync Pipeline")
   parser.add_argument("--operator", type=str, nargs='+',
                       help="One or more operators (e.g., --operator Vodafone WindTre). Omitting syncs all.")
@@ -36,6 +35,7 @@ if __name__ == '__main__':
                       help="File extension to process (e.g., ntm, csv). Omitting process all")
 
   parser.add_argument("--debug", action="store_true", default=False, help="Enable to show more cool debug lines!")
+  parser.add_argument("--dry-run", action="store_true", default=False, help="Do not actually sync")
 
   logger = Logger()
 
