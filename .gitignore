@@ -4,10 +4,10 @@
 .env.dev
 docs/*
 # Ignora tutto il contenuto delle cartelle degli operatori
-data/*/inbox/*
-data/*/archive/*
-data/*/log/*
+data/*/*/inbox/*
+data/*/*/archive/*
+data/*/*/log/*
 # Ma NON ignorare i file .gitkeep (la '!' serve a negare l'ignore)
-!data/*/inbox/.gitkeep
-!data/*/archive/.gitkeep
-!data/*/log/.gitkeep
+!data/*/*/inbox/.gitkeep
+!data/*/*/archive/.gitkeep
+!data/*/*/log/.gitkeep

@@ -2,7 +2,7 @@
 
 Attualmente sono supportati solo gli _operatori mobile_ e l'estrazione dei dati da file Netmonster (_ntm_), con possibilità di implementare un parser specifico per altre eventuali estensioni.
 Se non ti interessa il funzionamento salta direttamente al punto **"Come utilizzarlo?"**. In parole semplici, funziona nel seguente modo:
-1. Cerca i file contenenti i nuovi dati di copertura nella cartella `data/<operatore>/inbox`. È possibile filtrare la ricerca per un'estensione specifica (es. .ntm).
+1. Cerca i file contenenti i nuovi dati di copertura nella cartella `data/mobile/<operatore>/inbox`. È possibile filtrare la ricerca per un'estensione specifica (es. .ntm).
 2. In base all'estensione del file, istanzia automaticamente il parser corretto (es. NetmonsterParser per i file .ntm).
 3. Avvia il processo di parsing, passa i dati al sincronizzatore del database e, in caso di successo, rinomina e sposta il file originale nella cartella `data/<operatore>/archive`, aggiungendo un timestamp.
 
