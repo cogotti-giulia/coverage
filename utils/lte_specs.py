@@ -156,7 +156,7 @@ class MobileOperator(str, Enum):
   @property
   def base_path(self) -> str:
     base_dir = Path(__file__).resolve().parent.parent
-    return os.path.join(base_dir, "data", str(self.value))
+    return os.path.join(base_dir, "data", "mobile", str(self.value))
 
   @property
   def inbox_path(self) -> str:
