@@ -1,7 +1,6 @@
 .idea/*
 .venv/*
 .env
-.env.dev
 docs/*
 # Ignora tutto il contenuto delle cartelle degli operatori
 data/*/*/inbox/*

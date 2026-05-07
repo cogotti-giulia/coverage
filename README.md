@@ -1,11 +1,24 @@
 # Aggiornamento database di copertura
 
+# Introduzione
 Attualmente sono supportati solo gli _operatori mobile_ e l'estrazione dei dati da file Netmonster (_ntm_), con possibilità di implementare un parser specifico per altre eventuali estensioni.
 Se non ti interessa il funzionamento salta direttamente al punto **"Come utilizzarlo?"**. In parole semplici, funziona nel seguente modo:
 1. Cerca i file contenenti i nuovi dati di copertura nella cartella `data/mobile/<operatore>/inbox`. È possibile filtrare la ricerca per un'estensione specifica (es. .ntm).
 2. In base all'estensione del file, istanzia automaticamente il parser corretto (es. NetmonsterParser per i file .ntm).
 3. Avvia il processo di parsing, passa i dati al sincronizzatore del database e, in caso di successo, rinomina e sposta il file originale nella cartella `data/<operatore>/archive`, aggiungendo un timestamp.
 
+# Come collegare il database
+Le impostazioni del database devono essere inserite in un file `.env` (che logicamente viene escluso da git) posto nella cartella principale del progetto. 
+
+Dati da inserire:
+```
+DB_HOST="X.X.X.X"
+DB_USER="root"
+DB_PASSWORD=".rombo."
+DB_NAME="check_coverage"
+```
+
+Ricordarsi di chiamare la funzione `load_dotenv(".env")` all'inizio di ogni script. Il resto è gestito dal `utils/database/db_connect.py`.
 
 # LTE Italy
 

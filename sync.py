@@ -1,7 +1,7 @@
 import sys
 
 from dotenv import load_dotenv
-load_dotenv(".env.dev")
+load_dotenv(".env")
 import argparse
 import mysql.connector
 
