@@ -8,7 +8,7 @@ Se non ti interessa il funzionamento salta direttamente al punto **"Come utilizz
 3. Avvia il processo di parsing, passa i dati al sincronizzatore del database e, in caso di successo, rinomina e sposta il file originale nella cartella `data/<operatore>/archive`, aggiungendo un timestamp.
 
 # Come collegare il database
-La configurazione del database devono essere inserite in un file `.env` (che logicamente viene escluso da git) posto nella cartella principale del progetto. 
+La configurazione del database deve essere inserita in un file `.env` (che ovviamente viene escluso da git) posto nella cartella principale del progetto. 
 
 Dati da inserire:
 ```
@@ -18,7 +18,7 @@ DB_PASSWORD=".rombo."
 DB_NAME="check_coverage"
 ```
 
-Ricordarsi di chiamare la funzione `load_dotenv(".env")` all'inizio di ogni script. Il resto è gestito dal `utils/database/db_connect.py`.
+Ricordarsi di chiamare la funzione `load_dotenv(".env")` all'inizio di ogni script. Per il resto, non serve preoccuparsi di nulla, è tutto gestito dal `utils/database/db_connect.py`.
 
 # LTE Italy
 
