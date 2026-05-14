@@ -8,7 +8,7 @@ Se non ti interessa il funzionamento salta direttamente al punto **"Come utilizz
 3. Avvia il processo di parsing, passa i dati al sincronizzatore del database e, in caso di successo, rinomina e sposta il file originale nella cartella `data/<operatore>/archive`, aggiungendo un timestamp.
 
 # Come collegare il database
-Le impostazioni del database devono essere inserite in un file `.env` (che logicamente viene escluso da git) posto nella cartella principale del progetto. 
+La configurazione del database devono essere inserite in un file `.env` (che logicamente viene escluso da git) posto nella cartella principale del progetto. 
 
 Dati da inserire:
 ```
