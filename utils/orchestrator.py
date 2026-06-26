@@ -4,7 +4,7 @@ import os.path
 import shutil
 import mysql.connector
 
-from utils.lte_specs import MobileOperator
+from utils.operator import MobileOperator, BaseOperator
 from utils.parsers import NetmonsterParser
 from utils.style import Logger
 from utils.synchronizer import CoverageDbSynchronizer
@@ -33,7 +33,7 @@ class CoverageOrchestrator:
     else:
       raise ValueError(f"Unsupported file format: {ext}")
 
-  def _process_operator_files(self, operator: MobileOperator, extension: str = None):
+  def _process_operator_files(self, operator: BaseOperator, extension: str = None):
     """
     Finds files in the operator's inbox.
     If extension is provided (e.g., 'ntm'), only those files are processed.
@@ -66,7 +66,6 @@ class CoverageOrchestrator:
         synchronizer = CoverageDbSynchronizer(self.db_conn, debug_mode=self._DEBUG, dry_run_mode=self._DRY_RUN)
         synchronizer.replace_operator_coverage(operator, df)
 
-        # todo DO not archive if missing mncs on db table (????)
         # Archive the file if successful
 
         archive_filename = f"{timestamp}_{filename}"
@@ -98,15 +97,15 @@ class CoverageOrchestrator:
     if self._DEBUG:
       self._logger.info("Starting global coverage sync pipeline...")
 
-    for operator in MobileOperator:  # Ensure directories exist before we do anything
+    for operator in BaseOperator:  # Ensure directories exist before we do anything
       self.sync_operator(operator, extension)
     if self._DEBUG:
       self._logger.info("Global coverage sync pipeline finished.")
 
-  def sync_operator(self, operator_identifier: MobileOperator | str, extension: str = None):
+  def sync_operator(self, operator_identifier: BaseOperator | str, extension: str = None):
     """
     Runs the pipeline for a single specific operator.
-    Accepts either an Operator enum instance or a string name (e.g., 'TIM' or 'Vodafone').
+    Accepts either an Operator enum instance or a string name (e.g., 'TIM' or 'Vodafone' or 'fastweb_onnet').
     """
     target_op = MobileOperator.from_identifier(operator_identifier)
 

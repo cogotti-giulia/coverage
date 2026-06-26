@@ -3,7 +3,7 @@ import os
 
 import pandas as pd
 
-from utils.lte_specs import MobileOperator
+from utils.operator import MobileOperator
 from utils.style import Logger
 
 

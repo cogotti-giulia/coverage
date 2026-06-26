@@ -28,9 +28,9 @@ def main(args):
     sys.exit(1)
 
 if __name__ == '__main__':
-  parser = argparse.ArgumentParser(description="LTE Coverage Data Sync Pipeline")
+  parser = argparse.ArgumentParser(description="Coverage Data Sync Pipeline")
   parser.add_argument("--operator", type=str, nargs='+',
-                      help="One or more operators (e.g., --operator Vodafone WindTre). Omitting syncs all.")
+                      help="One or more operators (e.g., --operator vodafone WindTre fastweb_onnet). Omitting syncs all.")
   parser.add_argument("--format", type=str,
                       help="File extension to process (e.g., ntm, csv). Omitting process all")
 

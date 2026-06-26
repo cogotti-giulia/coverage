@@ -3,9 +3,10 @@ import datetime
 
 import pandas as pd
 
+from utils.database.config import DEFAULT_UPDATE_TABLE_NAME
 from utils.database.sql import SqlHelper
 from utils.exporter import BaseDataFrameExporter
-from utils.lte_specs import MobileOperator, DEFAULT_UPDATE_TABLE_NAME, DEFAULT_MNCS_TABLE_NAME
+from utils.operator import BaseOperator
 from utils.style import Logger
 
 
@@ -18,7 +19,8 @@ class CoverageDbSynchronizer(object):
     self._DRY_RUN = dry_run_mode
     self._logger = Logger()
 
-  def replace_operator_coverage(self, operator: MobileOperator, df: pd.DataFrame):
+
+  def replace_operator_coverage(self, operator: BaseOperator, df: pd.DataFrame):
     """
     Safely replaces the old coverage table with the newly parsed data.
     How does it work? (happy case, when everything works as expected)
@@ -78,20 +80,19 @@ class CoverageDbSynchronizer(object):
       # 6. Update check_coverage_coverageupdate table to track data update
       if self._DEBUG:
         self._logger.info(f"Updating coverage info data for {operator.name}")
-      placeholders = SqlHelper.build_in_placeholders(operator.mncs)
-      # 6.1 Get the supplier id by operator mncs
-      select_supplier_id_sql = f"""SELECT DISTINCT supplier_id FROM {DEFAULT_MNCS_TABLE_NAME} WHERE mnc IN ({placeholders});"""
-      res = self._sql_helper.execute(select_supplier_id_sql, params=operator.mncs)
+
+      # Verify supplier exists by name (adjust 'supplier_name')
+      select_supplier_sql = f"""SELECT id FROM {DEFAULT_UPDATE_TABLE_NAME} WHERE supplier = %s;"""
+      res = self._sql_helper.execute(select_supplier_sql, params=(operator.display_name,))
+
       if not res:
-        # FIXME (MAYBE) i'll just assume it exists, otherwise i'll warn the usr about creation
-        self._logger.warning(f"Operator with MNCs {operator.mncs} not found. Needs insertion. Please, run tool/create_mncs command first!")
+        self._logger.warning(
+          f"Operator '{operator.display_name}' not found in {DEFAULT_UPDATE_TABLE_NAME}. Please, add the supplier first!")
       else:
-        # 6.2 Update the info data by supplier id
-        res_list = SqlHelper.extract_column(res, 0)
-        update_sql = f"""UPDATE {DEFAULT_UPDATE_TABLE_NAME} SET last_update = %s WHERE id = %s;"""
-        self._sql_helper.execute(update_sql, params=(df.last_data_update, res_list[0]), commit=True)
+        update_sql = f"""UPDATE {DEFAULT_UPDATE_TABLE_NAME} SET last_update = %s WHERE supplier = %s;"""
+        self._sql_helper.execute(update_sql, params=(df.last_data_update, operator.display_name), commit=True)
         if self._DEBUG:
-          self._logger.info(f"Successfully updated coverage info data for {operator.name}")
+          self._logger.info(f"Successfully updated coverage info data for {operator.display_name}")
 
     except Exception as e:
       self._logger.error(f"Sync failed for {operator.name}. Cleaning up temporary data...")
