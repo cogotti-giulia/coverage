@@ -117,8 +117,6 @@ python sync.py --operator vodafone windtre --format ntm
 python sync.py --format ntm --debug
 ```
 
-> **ATTENZIONE**: la prima volta runnare il tool `create_mncs_table` prima di eseguire questo script!
-
 ## Eventuali tools
 All'interno della cartella `tools` sono presenti tutti gli script che possono tornare utili.
 
