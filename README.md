@@ -100,21 +100,7 @@ python sync.py --format ntm --debug
 ### Eventuali tools
 All'interno della cartella `tools` sono presenti tutti gli script che possono tornare utili.
 
-#### Creare tabella mncs e popolarla
-
-Lo script `create_mncs_table` si occupa di creare o aggiornare la tabella `check_coverage_coveragemncs`, inserendo, per ogni operatore:
-- **mnc**: codice univoco dell'operatore.
-- **supplier_id**: ID relativo all'operatore presente nella tabella `check_coverage_coverageupdate`. _(MyISAM non supporta le foreign key!)_
-
-Se una riga esiste già la ignora senza lanciare alcun errore.
-
-| PARAMETRI    | HELP                                                                                                        | VALORI                     | OBBLIGATORIO |
-|--------------|-------------------------------------------------------------------------------------------------------------|----------------------------|--------------|
-| `--operator` | Nome di uno o più operatori, se non specificato crea una riga per ogni operatore presente in OperatorMobile | str                        | nope         |
-
-Se ti stessi chiedendo a che serve per inserire correttamente la data di ultimo aggiornamento dei dati degli operatori, facilitando la selezione dell'operatore tramite il codice univoco.
-
 Esempio:
 ```
-python -m tools.create_mncs_table --operator vodafone windtre
+python -m tools.my_cool_script --arg1 "hello world!"
 ```

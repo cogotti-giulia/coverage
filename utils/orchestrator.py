@@ -5,7 +5,7 @@ import shutil
 import mysql.connector
 
 from utils.operator import MobileOperator, BaseOperator
-from utils.parsers import NetmonsterParser
+from utils.parsers import NetmonsterParser, CsvParser
 from utils.style import Logger
 from utils.synchronizer import CoverageDbSynchronizer
 
@@ -29,7 +29,7 @@ class CoverageOrchestrator:
     if ext == '.ntm':
       return NetmonsterParser()
     elif ext == '.csv':
-      raise NotImplementedError("CSV parser not yet implemented.")
+      return CsvParser()
     else:
       raise ValueError(f"Unsupported file format: {ext}")
 
@@ -55,7 +55,7 @@ class CoverageOrchestrator:
 
         # Get the right parser & load the dataframe
         parser = self._get_parser_for_file(filepath)
-        df = parser.to_dataframe(filepath)
+        df = parser.to_dataframe(filepath, operator)
 
         # Stop if empty
         if df.empty:
@@ -97,8 +97,9 @@ class CoverageOrchestrator:
     if self._DEBUG:
       self._logger.info("Starting global coverage sync pipeline...")
 
-    for operator in BaseOperator:  # Ensure directories exist before we do anything
-      self.sync_operator(operator, extension)
+    for enum_class in BaseOperator.__subclasses__():
+      for op in enum_class:
+        self.sync_operator(op, extension)
     if self._DEBUG:
       self._logger.info("Global coverage sync pipeline finished.")
 
@@ -107,7 +108,7 @@ class CoverageOrchestrator:
     Runs the pipeline for a single specific operator.
     Accepts either an Operator enum instance or a string name (e.g., 'TIM' or 'Vodafone' or 'fastweb_onnet').
     """
-    target_op = MobileOperator.from_identifier(operator_identifier)
+    target_op = BaseOperator.from_identifier(operator_identifier)
 
     # Ensure directories exist to prevent OS Errors (they should)
     os.makedirs(target_op.inbox_path, exist_ok=True)

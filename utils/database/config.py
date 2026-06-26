@@ -3,7 +3,6 @@
 # Default database table names
 # ===========================================
 DEFAULT_UPDATE_TABLE_NAME = "check_coverage_coverageupdate"
-DEFAULT_MNCS_TABLE_NAME = "check_coverage_coveragemncs"
 
 # ===========================================
 # Default database columns for standard operators

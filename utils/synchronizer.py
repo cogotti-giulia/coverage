@@ -92,7 +92,7 @@ class CoverageDbSynchronizer(object):
         update_sql = f"""UPDATE {DEFAULT_UPDATE_TABLE_NAME} SET last_update = %s WHERE supplier = %s;"""
         self._sql_helper.execute(update_sql, params=(df.last_data_update, operator.display_name), commit=True)
         if self._DEBUG:
-          self._logger.info(f"Successfully updated coverage info data for {operator.display_name}")
+          self._logger.info(f"Successfully updated coverage info data for {operator.name}")
 
     except Exception as e:
       self._logger.error(f"Sync failed for {operator.name}. Cleaning up temporary data...")

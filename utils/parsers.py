@@ -1,17 +1,42 @@
 import datetime
 import os
+import re
+from abc import abstractmethod, ABC
 
 import pandas as pd
 
-from utils.operator import MobileOperator
+from utils.operator import MobileOperator, BaseOperator
 from utils.style import Logger
 
-
-class NetmonsterParser(object):
-  """Parses Netmonster (.ntm) files and normalizes coverage data."""
+class BaseParser(ABC):
 
   def __init__(self):
     self._logger = Logger()
+
+  @abstractmethod
+  def _parse_file(self, filename: str, operator: BaseOperator|None) -> pd.DataFrame:
+    pass
+
+  def to_dataframe(self, filename: str, operator: BaseOperator|None) -> pd.DataFrame:
+    df = self._parse_file(filename, operator)
+
+    basename = os.path.basename(filename)
+    match = re.search(r'\d{8}', basename)
+    if match:
+      date_str = match.group(0)
+      extracted_date = datetime.datetime.strptime(date_str, "%Y%m%d")
+    else:
+      # Use today's date and time if the date is missing or invalid
+      extracted_date = datetime.datetime.now()
+
+    df.last_data_update = extracted_date.strftime('%Y-%m-%d %H:%M:%S')
+    return df
+
+class NetmonsterParser(BaseParser):
+  """Parses Netmonster (.ntm) files and normalizes coverage data."""
+
+  def __init__(self):
+    super(NetmonsterParser, self).__init__()
 
   def _normalize_technology(self, df: pd.DataFrame) -> pd.DataFrame:
     mask_4g = df['technology'].str.contains('4G', case=False, na=False)
@@ -35,7 +60,7 @@ class NetmonsterParser(object):
       # Fallback just in case the band_id or mnc isn't found
       return (None, None)
 
-  def _parse_file(self, filename: str) -> pd.DataFrame:
+  def _parse_file(self, filename: str, operator: BaseOperator|None) -> pd.DataFrame:
     column_names = ["technology", "mcc", "mnc", "cid", "tac", "enodeb", "pci", "latitude", "longitude", "description",
                     "earfcn"]
 
@@ -72,8 +97,15 @@ class NetmonsterParser(object):
     # df_db_ready = df_db_ready.drop_duplicates(subset=['band_id', 'loss', 'site_name'], keep='first')
     return df_db_ready
 
-  def to_dataframe(self, filename) -> pd.DataFrame:
-    df = self._parse_file(filename)
-    date_str = os.path.basename(filename).split('_')[1]
-    df.last_data_update = datetime.datetime.strptime(date_str, "%Y%m%d").strftime('%Y-%m-%d %H:%M:%S')
-    return df
+
+class CsvParser(BaseParser):
+  """Parses CSV files."""
+  # TODO sarebbe carino generalizzare la cosa dato che ora assumo che le colonne si chiamino come quelle nel db...
+
+  def __init__(self):
+    super(CsvParser, self).__init__()
+
+  def _parse_file(self, filename: str, operator: BaseOperator|None) -> pd.DataFrame:
+    df = pd.read_csv(filename, sep=";", header=0)
+    df_db_ready = df[operator.db_columns].copy()
+    return df_db_ready

@@ -66,9 +66,12 @@ class BaseOperator(str, Enum):
     # If it's a string, perform the lookup by the Enum name (e.g., 'VODAFONE') or value (e.g., 'Vodafone')
     if isinstance(identifier, str):
       identifier_upper = identifier.upper()
-      for op in cls:
-        if op.name.upper() == identifier_upper or op.value.upper() == identifier_upper:
-          return op
+      classes_to_search = [cls] + cls.__subclasses__()
+
+      for enum_class in classes_to_search:
+        for op in enum_class:
+          if op.name.upper() == identifier_upper or op.value.upper() == identifier_upper:
+            return op
 
     # Handle the case where it's not found
     logger = Logger()
@@ -94,7 +97,7 @@ class MobileOperator(BaseOperator):
   def category_folder(self):
     return "mobile"
 
-  TIM = ("tim", "TIM", ("01",), [
+  TIM = ("TIM", "TIM", ("01",), [
     Spec(band=LTEBand.B28, bandwidth=Bandwidth.MHZ_10),
     Spec(band=LTEBand.B20, bandwidth=Bandwidth.MHZ_10),
     Spec(band=LTEBand.B8, bandwidth=Bandwidth.MHZ_5),
@@ -163,7 +166,7 @@ class SimpleOperator(BaseOperator):
 
   # value display_name columns
   FASTWEB_ONNET = ("fastweb_onnet", "Fastweb ONNET", DEFAULT_FASTWEB_FTTO_LIKE_DB_COLUMNS)
-  FASTWEB_ONPNT = ("fastweb_midnet", "Fastweb MIDNET", DEFAULT_FASTWEB_FTTO_LIKE_DB_COLUMNS)
+  FASTWEB_MIDNET = ("fastweb_midnet", "Fastweb MIDNET", DEFAULT_FASTWEB_FTTO_LIKE_DB_COLUMNS)
 
   def __new__(cls, value, display_name, db_columns):
     obj = str.__new__(cls, value)
