@@ -164,7 +164,6 @@ class SimpleOperator(BaseOperator):
   def category_folder(self):
     return "simple"
 
-  # value display_name columns
   FASTWEB_ONNET = ("fastweb_onnet", "Fastweb ONNET", DEFAULT_FASTWEB_FTTO_LIKE_DB_COLUMNS)
   FASTWEB_MIDNET = ("fastweb_midnet", "Fastweb MIDNET", DEFAULT_FASTWEB_FTTO_LIKE_DB_COLUMNS)
 
