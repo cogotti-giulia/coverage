@@ -65,9 +65,9 @@ Per quanto riguarda gli operatori **mobile**, nel file `utils/lte_specs.py` si t
 ## 1. Orchestrazione (CoverageOrchestrator)
 Si occupa di coordinare l'intero flusso di lavoro per ogni singolo operatore telefonico:
 
-1. Cerca i file contenenti i nuovi dati di copertura nella cartella `data/<operatore>/inbox`. È possibile filtrare la ricerca per un'estensione specifica (es. .ntm).
+1. Cerca i file contenenti i nuovi dati di copertura nella cartella `data/<tipo di operatore: "mobile" o "simple">/<operatore>/inbox`. È possibile filtrare la ricerca per un'estensione specifica (es. .ntm).
 2. In base all'estensione del file, istanzia automaticamente il parser corretto (es. NetmonsterParser per i file .ntm).
-3. Avvia il processo di parsing, passa i dati al sincronizzatore del database e, in caso di successo, rinomina e sposta il file originale nella cartella `data/<operatore>/archive`, aggiungendo un timestamp.
+3. Avvia il processo di parsing, passa i dati al sincronizzatore del database e, in caso di successo, rinomina e sposta il file originale nella cartella `data/<tipo di operatore: "mobile" o "simple">/<operatore>/archive`, aggiungendo un timestamp.
 
 ## 2. Estrazione e trasformazione dati (Parsing)
 ### 2.1 NetmonsterParser
@@ -103,8 +103,8 @@ Lo script principale `sync.py` si trova nella cartella principale del progetto.
 
 | PARAMETRI    | HELP                                                                                                                                                                                                                                             | VALORI                     | OBBLIGATORIO |
 |--------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------|--------------|
-| `--operator` | Nome di uno o più operatori, se non specificato sincronizza tutti quelli presenti in OperatorMobile                                                                                                                                              | str                        | nope         |
-| `--format`   | Formato dei file con i dati di copertura da prelevare nella cartella `data/<tipo di operatore: "mobile" o "simple">/<operator>/inbox`. Se non specificato preleva tutti i file presenti (anche se attualmente è supportato solo il formato ntm). | str                        | nope         |     
+| `--operator` | Nome di uno o più operatori, se non specificato sincronizza tutti quelli presenti in BaseOperator e relative sottoclassi                                                                                                                                              | str                        | nope         |
+| `--format`   | Formato dei file con i dati di copertura da prelevare nella cartella `data/<tipo di operatore: "mobile" o "simple">/<operator>/inbox`. Se non specificato preleva tutti i file presenti (anche se attualmente è supportato solo il formato ntm e circa il csv). | str                        | nope         |     
 | `--debug`    | Mostra tante righe carine e utili di debug                                                                                                                                                                                                       | boolean, False di default  | nope         |  
 | `--dry-run`  | Esegue una simulazione, senza modificare i dati nel database e senza spostare i file                                                                                                                                                             | boolean, False di default  | nope         |
 
