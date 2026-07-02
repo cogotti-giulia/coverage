@@ -54,7 +54,7 @@ Nel file `utils/operator.py` si trovano tutti i dati e le logiche necessarie a m
 
 Per quanto riguarda gli operatori **mobile**, nel file `utils/lte_specs.py` si trovano tutti i dati e le logiche necessarie a modellare le specifiche delle reti mobili in Italia. Di seguito i componenti principali:
 
-1 **Specifiche Tecniche della Rete**
+1. **Specifiche Tecniche della Rete**
 
     - **Bande LTE (LTEBand)**: Un Enum di tipo stringa che mappa le bande LTE usate in Italia (es. B28, B20, B3). Sovrascrivendo la creazione dell'oggetto, ad ogni stringa viene agganciata automaticamente la sua rispettiva frequenza in MHz (es. B20 = 800 MHz).
     - **Ampiezza di Banda (Bandwidth)**: Un Enum intero che cataloga i tagli di banda disponibili espressi in MHz (5, 10, 15, 20).
