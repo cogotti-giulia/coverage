@@ -8,16 +8,17 @@ import pandas as pd
 from utils.operator import MobileOperator, BaseOperator
 from utils.style import Logger
 
+
 class BaseParser(ABC):
 
   def __init__(self):
     self._logger = Logger()
 
   @abstractmethod
-  def _parse_file(self, filename: str, operator: BaseOperator|None) -> pd.DataFrame:
+  def _parse_file(self, filename: str, operator: BaseOperator | None) -> pd.DataFrame:
     pass
 
-  def to_dataframe(self, filename: str, operator: BaseOperator|None) -> pd.DataFrame:
+  def to_dataframe(self, filename: str, operator: BaseOperator | None) -> pd.DataFrame:
     df = self._parse_file(filename, operator)
 
     basename = os.path.basename(filename)
@@ -31,6 +32,7 @@ class BaseParser(ABC):
 
     df.last_data_update = extracted_date.strftime('%Y-%m-%d %H:%M:%S')
     return df
+
 
 class NetmonsterParser(BaseParser):
   """Parses Netmonster (.ntm) files and normalizes coverage data."""
@@ -60,7 +62,7 @@ class NetmonsterParser(BaseParser):
       # Fallback just in case the band_id or mnc isn't found
       return (None, None)
 
-  def _parse_file(self, filename: str, operator: BaseOperator|None) -> pd.DataFrame:
+  def _parse_file(self, filename: str, operator: BaseOperator | None) -> pd.DataFrame:
     column_names = ["technology", "mcc", "mnc", "cid", "tac", "enodeb", "pci", "latitude", "longitude", "description",
                     "earfcn"]
 
@@ -85,6 +87,26 @@ class NetmonsterParser(BaseParser):
 
     # Split the mapped tuple into two columns
     df[['speed', 'bandwidth']] = pd.DataFrame(df['speed_freq'].tolist(), index=df.index)
+
+    # Identify rows that failed the lookup
+    invalid_mask = df['speed'].isna() | df['bandwidth'].isna()
+    if invalid_mask.any():
+      # Count exactly how many times each invalid band appears
+      dropped_counts = df.loc[invalid_mask, 'band_id'].value_counts()
+      band_details = ", ".join([f"{band} ({count} rows)" for band, count in dropped_counts.items()])
+      total_dropped = dropped_counts.sum()
+      file_basename = os.path.basename(filename)
+      self._logger.warning(
+        f"Dropping {total_dropped} unsupported rows for {operator.display_name} "
+        f"in {file_basename}: {band_details}"
+      )
+      # Save the dropped rows to a CSV in the operator's log folder for future review
+      dropped_df = df[invalid_mask].copy()
+      timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+      dropped_log_file = os.path.join(operator.log_path, f"{timestamp}_dropped_bands.csv")
+      dropped_df.to_csv(dropped_log_file, mode='a', index=False)
+    # DROP all rows where the lookup failed
+    df = df.dropna(subset=['speed', 'bandwidth'])
     # Rename 'earfcn' to match the database column 'arfcn'
     df = df.rename(columns={'earfcn': 'arfcn'})
 
@@ -100,12 +122,13 @@ class NetmonsterParser(BaseParser):
 
 class CsvParser(BaseParser):
   """Parses CSV files."""
+
   # TODO sarebbe carino generalizzare la cosa dato che ora assumo che le colonne si chiamino come quelle nel db...
 
   def __init__(self):
     super(CsvParser, self).__init__()
 
-  def _parse_file(self, filename: str, operator: BaseOperator|None) -> pd.DataFrame:
+  def _parse_file(self, filename: str, operator: BaseOperator | None) -> pd.DataFrame:
     df = pd.read_csv(filename, sep=";", header=0)
     df_db_ready = df[operator.db_columns].copy()
     return df_db_ready
